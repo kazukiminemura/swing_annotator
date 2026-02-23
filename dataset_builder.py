@@ -160,12 +160,14 @@ def build_dataset_from_anchors(
     video_stem = video_path.stem
     labels_used: set[str] = set()
 
-    with manifest_path.open("w", encoding="utf-8", newline="") as f:
+    manifest_exists = manifest_path.exists() and manifest_path.stat().st_size > 0
+    with manifest_path.open("a", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(
             f,
             fieldnames=["image_path", "label", "frame_index", "video", "split"],
         )
-        writer.writeheader()
+        if not manifest_exists:
+            writer.writeheader()
         for frame_index, frame in iter_frames(cap):
             if frame_index % step != 0:
                 continue
